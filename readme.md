@@ -1,6 +1,8 @@
 kubernetes-rabbit-mq-cluster
 ---------------------------
 
+[![Build Status](https://travis-ci.org/mdevilliers/kubernetes-rabbitmq-cluster.svg)](https://travis-ci.org/mdevilliers/kubernetes-rabbitmq-cluster)
+
 Expermiment to produce a "kubernentes first" rabbitmq cluster manager.
 
 
@@ -23,6 +25,7 @@ Docker Images
 
 rabbitmq-cluster-node - hosts a rabbitmq instance and rabbitmq-cluster-sidekick instance
 
+
 rabbitmq-cluster-admin - hosts a rabbitmq-cluster-admin instance
 
 Kubernentes files
@@ -30,15 +33,18 @@ Kubernentes files
 
 rabbitmq-cluster-rc.yaml
 
+
 rabbitmq-cluster-service.yaml
 
+
 rabbitmq-cluster-admin-rc.yaml
+
 
 rabbitmq-cluster-admin-service.yaml
 
 
-Requirments
------------
+Requirements
+------------
 
 - kubernentes
 - docker 
