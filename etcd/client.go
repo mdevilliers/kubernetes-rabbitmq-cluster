@@ -21,35 +21,27 @@ func NewClient(etcdConnectionStrings []string) (*Client, error) {
 }
 
 /*
-/registry/rabbitmq-cluster/{LOGICAL_NAME}/nodes/.....
-/registry/rabbitmq-cluster/{LOGICAL_NAME}/node/users/....
-/registry/rabbitmq-cluster/{LOGICAL_NAME}/node/plugins/....
+/registry/rabbitmq-cluster/{LOGICAL_NAME}/idAddress_10.1.1.1 "alive"
+/registry/rabbitmq-cluster/{LOGICAL_NAME}/idAddress_10.1.1.2 "alive"
+/registry/rabbitmq-cluster/{LOGICAL_NAME}/state/users/....
+/registry/rabbitmq-cluster/{LOGICAL_NAME}/state/xxxx/....
 */
 
 func (c *Client) InitOrPanic(clusterName string) {
 
-	clusterNodeName := "/registry/rabbitmq-cluster/" + clusterName
+	clusterNodeName := getEtcdClusterRoot(clusterName)
 
-	_, err := c.client.Get(clusterNodeName, true, true)
-
-	if err != nil {
-
-		if isKeyNotFoundError(err) {
-
-			_, err := c.client.SetDir(clusterNodeName, 0)
-			if err != nil {
-				message := "Error creating key :" + clusterNodeName + err.Error()
-				panic(message)
-			}
-
-		} else {
-			panic(err.Error())
-		}
+	if err := c.ensureDirExists(clusterNodeName); err != nil {
+		message := "Error creating key :" + clusterNodeName + err.Error()
+		panic(message)
 	}
+
 	go c.loop(clusterNodeName)
+	go c.watch(clusterNodeName)
 }
 
-func (c *Client) loop(clusterNodeName string) {
+// pings etcd on a schedule setting the ipadress
+func (c *Client) loop(clusterName string) {
 
 	ipAddress, err := util.GetIPAddress()
 
@@ -57,16 +49,64 @@ func (c *Client) loop(clusterNodeName string) {
 		panic("Error retreiving ipAddress : " + err.Error())
 	}
 
-	fmt.Println(clusterNodeName, ipAddress)
+	fmt.Println(clusterName, ipAddress)
 
-	_, err = c.client.Set(clusterNodeName+"/"+ipAddress, "alive", 30)
+	_, err = c.client.Set(clusterName+"/ipAddress_"+ipAddress, "alive", 30)
 
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	// pings etcd on a schedule setting its alive key in the nodes key!
-	util.Schedule(func() { c.loop(clusterNodeName) }, time.Second*20)
 
+	util.ScheduleInNewGoRoutine(func() { c.loop(clusterName) }, time.Second*20)
+
+}
+
+// watches for changes in the cluster
+func (c *Client) watch(clusterName string) {
+
+	ch := make(chan *etcdclient.Response, 10)
+	stop := make(chan bool, 1)
+
+	go c.simpleReceiver(ch)
+
+	fmt.Println("watching : ", clusterName)
+
+	_, err := c.client.Watch(getEtcdClusterRoot(clusterName), 0, true, ch, stop)
+
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+}
+
+func (c *Client) simpleReceiver(cs chan *etcdclient.Response) {
+	fmt.Println("receiving...")
+
+	for s := range cs {
+		fmt.Println("Received in watch : ", s)
+	}
+}
+
+func (c *Client) ensureDirExists(path string) error {
+
+	_, err := c.client.Get(path, true, true)
+
+	if err != nil {
+
+		if isKeyNotFoundError(err) {
+
+			_, err := c.client.SetDir(path, 0)
+			if err != nil {
+				return err
+			}
+		} else {
+			return err
+		}
+	}
+	return nil
+}
+
+func getEtcdClusterRoot(clusterName string) string {
+	return "/registry/rabbitmq-cluster/" + clusterName
 }
 
 //https://github.com/coreos/etcd/blob/master/Documentation/errorcode.md

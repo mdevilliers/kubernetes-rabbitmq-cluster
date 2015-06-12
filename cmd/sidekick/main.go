@@ -11,15 +11,12 @@ func main() {
 	client, _ := etcd.NewClient([]string{"http://127.0.0.1:2379"})
 	client.InitOrPanic("astana")
 	/*
-		- sidekick 1
-				- configure cluster with random node not me
-				- sidekick 2
-					- sets key on a loop with a ttl
-				- sidekick 3
-					- has super set of all the rabbitmq nodes for a LOGICAL_NAME
-					- if one is missing for a LOST_PERIOD - remove from the local cluster
-				- sidekick 4
-					- starts rabbitmq
+		1. configure cluster with random node not me
+		2. sets key on a loop with a ttl
+		3. has super set of all the rabbitmq nodes for a LOGICAL_NAME
+			if one is missing for a LOST_PERIOD - remove from the local cluster
+			if it reappears add to the cluster
+		4. replicates state from etcd to the nodes e.g. users, permissions, plugins etc
 	*/
 
 	var ch chan bool

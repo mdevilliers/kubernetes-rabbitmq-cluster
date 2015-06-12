@@ -5,8 +5,12 @@ import (
 )
 
 func Schedule(what func(), delay time.Duration) {
-	go func() {
+	func() {
 		time.Sleep(delay)
 		what()
 	}()
+}
+
+func ScheduleInNewGoRoutine(what func(), delay time.Duration) {
+	go Schedule(what, delay)
 }
