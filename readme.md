@@ -3,7 +3,7 @@ kubernetes-rabbitmq-cluster
 
 [![Build Status](https://travis-ci.org/mdevilliers/kubernetes-rabbitmq-cluster.svg)](https://travis-ci.org/mdevilliers/kubernetes-rabbitmq-cluster)
 
-Experimment to produce a "kubernentes first" rabbitmq cluster manager.
+Experiment to produce a "kubernentes first" rabbitmq cluster manager.
 
 Aims
 ----
