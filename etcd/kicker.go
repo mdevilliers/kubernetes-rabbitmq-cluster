@@ -8,7 +8,7 @@ import (
 
 var (
 	KickInterval = time.Second * 20
-	KeyLifeTime  = 25
+	KeyLifeTime  = uint64(25)
 )
 
 type Kicker struct {
