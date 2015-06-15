@@ -8,6 +8,7 @@
 _obj
 _test
 log
+_output
 
 # Architecture specific extensions/prefixes
 *.[568vq]
@@ -23,8 +24,4 @@ _testmain.go
 
 *.exe
 *.test
-
-# executables in the main folder
-main/noop/noop
-main/redis-haproxy/redis-haproxy
-main/redis-consul/redis-consul
+*.cov
