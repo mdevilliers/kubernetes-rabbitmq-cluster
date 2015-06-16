@@ -36,6 +36,7 @@ Components
 - docker images
 - kubernetes yaml configuration
 
+
 Docker Images
 -------------
 
@@ -43,6 +44,7 @@ rabbitmq-cluster-node - hosts a rabbitmq instance and rabbitmq-cluster-sidekick 
 
 
 rabbitmq-cluster-admin - hosts a rabbitmq-cluster-admin instance
+
 
 Kubernentes files
 -----------------

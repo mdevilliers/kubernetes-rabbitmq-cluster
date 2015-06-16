@@ -28,7 +28,6 @@ func NewKicker(connection *etcd.Connection, paths *paths.Paths, ipAddress string
 	}
 
 	if err := kicker.ensureDirExists(paths.ClusterRoot()); err != nil {
-
 		panic(err.Error())
 	}
 

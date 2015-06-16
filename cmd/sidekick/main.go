@@ -1,9 +1,11 @@
 package main
 
 import (
+	"flag"
 	"github.com/mdevilliers/kubernetes-rabbitmq-cluster/pkg/etcd"
 	"github.com/mdevilliers/kubernetes-rabbitmq-cluster/pkg/logger"
 	"github.com/mdevilliers/kubernetes-rabbitmq-cluster/pkg/paths"
+	"github.com/mdevilliers/kubernetes-rabbitmq-cluster/pkg/rabbitmq"
 	"github.com/mdevilliers/kubernetes-rabbitmq-cluster/pkg/sidekick"
 	"github.com/mdevilliers/kubernetes-rabbitmq-cluster/pkg/util"
 )
@@ -20,6 +22,14 @@ func main() {
 	*/
 
 	logger.Info.Println("rabbitmq-cluster-sidekick")
+
+	flag.Parse()
+
+	_, err := rabbitmq.StartNode("golang@localhost", "xxx")
+
+	if err != nil {
+		panic("Error connecting Erlang node : " + err.Error())
+	}
 
 	connection := etcd.NewConnection([]string{"http://127.0.0.1:2379"})
 	pathManager := paths.NewPathManager("astana")
