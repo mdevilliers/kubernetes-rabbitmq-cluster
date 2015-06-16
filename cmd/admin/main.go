@@ -1,7 +1,7 @@
 package main
 
-import "fmt"
+import "github.com/mdevilliers/kubernetes-rabbitmq-cluster/pkg/logger"
 
 func main() {
-	fmt.Printf("Hello from rabbitmq-cluster-admin\n")
+	logger.Info.Printf("Hello from rabbitmq-cluster-admin\n")
 }

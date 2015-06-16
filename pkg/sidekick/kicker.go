@@ -1,8 +1,8 @@
 package sidekick
 
 import (
-	"fmt"
 	"github.com/mdevilliers/kubernetes-rabbitmq-cluster/pkg/etcd"
+	"github.com/mdevilliers/kubernetes-rabbitmq-cluster/pkg/logger"
 	"github.com/mdevilliers/kubernetes-rabbitmq-cluster/pkg/paths"
 	"github.com/mdevilliers/kubernetes-rabbitmq-cluster/pkg/util"
 	"time"
@@ -28,6 +28,7 @@ func NewKicker(connection *etcd.Connection, paths *paths.Paths, ipAddress string
 	}
 
 	if err := kicker.ensureDirExists(paths.ClusterRoot()); err != nil {
+
 		panic(err.Error())
 	}
 
@@ -39,7 +40,7 @@ func (k *Kicker) StartKicking() {
 	_, err := k.connection.Set(k.paths.NodeIpAddressKey(k.ipAddress), "alive", KeyLifeTime)
 
 	if err != nil {
-		fmt.Println(err.Error())
+		logger.Error.Panic(err.Error())
 	}
 
 	util.ScheduleInNewGoRoutine(func() { k.StartKicking() }, KickInterval)

@@ -1,7 +1,6 @@
 package etcd
 
 import (
-	"fmt"
 	etcdclient "github.com/coreos/go-etcd/etcd"
 )
 
@@ -19,13 +18,9 @@ func NewConnection(etcdConnectionStrings []string) *Connection {
 }
 
 // watches for changes in the cluster
-func (c *Connection) Watch(etcdPath string, ch chan *etcdclient.Response, stop chan bool) {
-
+func (c *Connection) Watch(etcdPath string, ch chan *etcdclient.Response, stop chan bool) error {
 	_, err := c.client.Watch(etcdPath, 0, true, ch, stop)
-
-	if err != nil {
-		fmt.Println(err.Error())
-	}
+	return err
 }
 
 func (c *Connection) Get(path string) (*etcdclient.Response, error) {

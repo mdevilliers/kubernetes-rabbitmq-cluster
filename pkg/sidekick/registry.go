@@ -2,9 +2,9 @@ package sidekick
 
 import (
 	"errors"
-	"fmt"
 	etcdclient "github.com/coreos/go-etcd/etcd"
 	"github.com/mdevilliers/kubernetes-rabbitmq-cluster/pkg/etcd"
+	"github.com/mdevilliers/kubernetes-rabbitmq-cluster/pkg/logger"
 	"github.com/mdevilliers/kubernetes-rabbitmq-cluster/pkg/paths"
 	"sync"
 )
@@ -87,7 +87,7 @@ func (r *Registry) StartWatches() {
 
 	for key, value := range r.callbacks {
 
-		fmt.Println("Key:", key, "Value:", value)
+		logger.Trace.Println("Key:", key, "Value:", value)
 		ch := make(chan *etcdclient.Response, 10)
 
 		go r.simpleReceiver(ch, key, value)
@@ -99,8 +99,6 @@ func (r *Registry) simpleReceiver(cs chan *etcdclient.Response, watchPath string
 
 	for response := range cs {
 
-		fmt.Printf("Received in watch : %s \n", etcd.PrettyPrintResponse(response))
-
 		callbackResponse := &Response{
 			Path:      response.Node.Key,
 			NewValue:  response.Node.Value,
@@ -108,7 +106,7 @@ func (r *Registry) simpleReceiver(cs chan *etcdclient.Response, watchPath string
 			WatchPath: watchPath,
 		}
 
-		fmt.Printf("Received in watch : Path : %s, Old Value : %s, New Value %s \n", callbackResponse.Path, callbackResponse.OldValue, callbackResponse.NewValue)
+		logger.Trace.Printf("Received in watch : Path : %s, Old Value : %s, New Value %s \n", callbackResponse.Path, callbackResponse.OldValue, callbackResponse.NewValue)
 
 		cb(callbackResponse)
 	}
