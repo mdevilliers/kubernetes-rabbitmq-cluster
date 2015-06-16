@@ -21,8 +21,6 @@ func NewConnection(etcdConnectionStrings []string) *Connection {
 // watches for changes in the cluster
 func (c *Connection) Watch(etcdPath string, ch chan *etcdclient.Response, stop chan bool) {
 
-	fmt.Println("watching : ", etcdPath)
-
 	_, err := c.client.Watch(etcdPath, 0, true, ch, stop)
 
 	if err != nil {

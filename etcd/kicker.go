@@ -17,13 +17,7 @@ type Kicker struct {
 	ipAddress  string
 }
 
-func NewKicker(connection *Connection, paths *Paths) *Kicker {
-
-	ipAddress, err := util.GetIPAddress()
-
-	if err != nil {
-		panic("Error retreiving ipAddress : " + err.Error())
-	}
+func NewKicker(connection *Connection, paths *Paths, ipAddress string) *Kicker {
 
 	kicker := &Kicker{
 		connection: connection,
@@ -40,7 +34,7 @@ func NewKicker(connection *Connection, paths *Paths) *Kicker {
 
 func (k *Kicker) StartKicking() {
 
-	_, err := k.connection.Set(k.getIPAddressKey(), "alive", KeyLifeTime)
+	_, err := k.connection.Set(k.paths.NodeIpAddressKey(k.ipAddress), "alive", KeyLifeTime)
 
 	if err != nil {
 		fmt.Println(err.Error())
@@ -66,8 +60,4 @@ func (k *Kicker) ensureDirExists(path string) error {
 		}
 	}
 	return nil
-}
-
-func (k *Kicker) getIPAddressKey() string {
-	return k.paths.NodeIpAddressKey() + k.ipAddress
 }

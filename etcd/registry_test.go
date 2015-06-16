@@ -1,7 +1,6 @@
 package etcd
 
 import (
-	etcdclient "github.com/coreos/go-etcd/etcd"
 	"testing"
 )
 
@@ -11,7 +10,7 @@ func TestNewRegistry(t *testing.T) {
 
 	called := false
 
-	cb := func(_ *etcdclient.Response) (bool, error) {
+	cb := func(_ *Response) (bool, error) {
 		called = true
 		return true, nil
 	}
@@ -42,7 +41,7 @@ func TestItemDoesNotExistInRegistry(t *testing.T) {
 func TestItemAddedTwiceErrors(t *testing.T) {
 	registry := NewRegistry(nil, nil)
 
-	cb := func(_ *etcdclient.Response) (bool, error) {
+	cb := func(_ *Response) (bool, error) {
 		return true, nil
 	}
 
@@ -62,7 +61,7 @@ func TestItemAddedTwiceErrors(t *testing.T) {
 func TestUnableToAddIfSealed(t *testing.T) {
 	registry := NewRegistry(nil, nil)
 
-	cb := func(_ *etcdclient.Response) (bool, error) {
+	cb := func(_ *Response) (bool, error) {
 		return true, nil
 	}
 

@@ -24,6 +24,6 @@ func (p *Paths) ClusterRoot() string {
 func (p *Paths) ClusterStateRoot() string {
 	return p.ClusterRoot() + "/state"
 }
-func (p *Paths) NodeIpAddressKey() string {
-	return p.ClusterRoot() + "/ipAddress_"
+func (p *Paths) NodeIpAddressKey(ipAddress string) string {
+	return p.ClusterRoot() + "/ipAddress_" + ipAddress
 }

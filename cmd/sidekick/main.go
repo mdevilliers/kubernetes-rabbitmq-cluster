@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	etcdclient "github.com/coreos/go-etcd/etcd"
 	"github.com/mdevilliers/kubernetes-rabbitmq-cluster/etcd"
+	"github.com/mdevilliers/kubernetes-rabbitmq-cluster/util"
 )
 
 func main() {
@@ -22,17 +22,25 @@ func main() {
 	connection := etcd.NewConnection([]string{"http://127.0.0.1:2379"})
 	pathManager := etcd.NewPathManager("astana")
 
-	kicker := etcd.NewKicker(connection, pathManager)
+	ipAddress, err := util.GetIPAddress()
+
+	if err != nil {
+		panic("Error retreiving ipAddress : " + err.Error())
+	}
+
+	kicker := etcd.NewKicker(connection, pathManager, ipAddress)
 	kicker.StartKicking()
 
 	registry := etcd.NewRegistry(connection, pathManager)
 
-	cb := func(r *etcdclient.Response) (bool, error) {
-		fmt.Printf("Recieved : %s", etcd.PrettyPrintResponse(r))
+	cb := func(r *etcd.Response) (bool, error) {
+		fmt.Printf("Recieved in callback - Path : %s, Watching: %s, Old Value : %s, New Value %s \n", r.Path, r.WatchPath, r.OldValue, r.NewValue)
 		return true, nil
 	}
 
+	registry.Put(pathManager.NodeIpAddressKey(ipAddress), cb)
 	registry.Put("/registry/rabbitmq-cluster", cb)
+
 	registry.Seal()
 	registry.StartWatches()
 

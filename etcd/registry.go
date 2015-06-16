@@ -21,8 +21,15 @@ type Registry struct {
 	paths      *Paths
 }
 
+type Response struct {
+	Path      string
+	NewValue  string
+	OldValue  string
+	WatchPath string
+}
+
 // TODO : return a object with Path, Value, NewValue
-type RegistryCallback func(*etcdclient.Response) (bool, error)
+type RegistryCallback func(*Response) (bool, error)
 
 func NewRegistry(connection *Connection, paths *Paths) *Registry {
 	return &Registry{
@@ -68,22 +75,39 @@ func (r *Registry) Seal() {
 	r.sealed = true
 }
 
+//TODO : wire up initial state provider
 func (r *Registry) StartWatches() {
 	r.Lock()
 	defer r.Unlock()
 
-	ch := make(chan *etcdclient.Response, 10)
+	// TODO : wire up stop correctly
 	stop := make(chan bool, 1)
 
-	go r.simpleReceiver(ch)
-	go r.connection.Watch(r.paths.ClusterRoot(), ch, stop)
+	for key, value := range r.callbacks {
+
+		fmt.Println("Key:", key, "Value:", value)
+		ch := make(chan *etcdclient.Response, 10)
+
+		go r.simpleReceiver(ch, key, value)
+		go r.connection.Watch(key, ch, stop)
+	}
 }
 
-func (r *Registry) simpleReceiver(cs chan *etcdclient.Response) {
-	fmt.Println("receiving...")
+func (r *Registry) simpleReceiver(cs chan *etcdclient.Response, watchPath string, cb RegistryCallback) {
 
 	for response := range cs {
-		// TODO delegate to callback
+
 		fmt.Printf("Received in watch : %s \n", PrettyPrintResponse(response))
+
+		callbackResponse := &Response{
+			Path:      response.Node.Key,
+			NewValue:  response.Node.Value,
+			OldValue:  response.PrevNode.Value,
+			WatchPath: watchPath,
+		}
+
+		fmt.Printf("Received in watch : Path : %s, Old Value : %s, New Value %s \n", callbackResponse.Path, callbackResponse.OldValue, callbackResponse.NewValue)
+
+		cb(callbackResponse)
 	}
 }
