@@ -17,7 +17,7 @@ func main() {
 		4. replicates state from etcd to the nodes e.g. users, permissions, plugins etc
 	*/
 
-	fmt.Println("rabbitmq-cluster-sidekick\n")
+	fmt.Println("rabbitmq-cluster-sidekick")
 
 	connection := etcd.NewConnection([]string{"http://127.0.0.1:2379"})
 	pathManager := etcd.NewPathManager("astana")
@@ -28,7 +28,7 @@ func main() {
 	registry := etcd.NewRegistry(connection, pathManager)
 
 	cb := func(r *etcdclient.Response) (bool, error) {
-		fmt.Println("Recieved : ", etcd.PrettyPrintResponse(r))
+		fmt.Printf("Recieved : %s", etcd.PrettyPrintResponse(r))
 		return true, nil
 	}
 
