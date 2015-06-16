@@ -10,7 +10,7 @@ func PrettyPrintResponse(r *etcdclient.Response) string {
 }
 
 //https://github.com/coreos/etcd/blob/master/Documentation/errorcode.md
-func isKeyNotFoundError(err error) bool {
+func IsKeyNotFoundError(err error) bool {
 	return isEtcdError(err, 100)
 }
 

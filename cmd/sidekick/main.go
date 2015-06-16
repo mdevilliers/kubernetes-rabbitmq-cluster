@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/mdevilliers/kubernetes-rabbitmq-cluster/etcd"
-	"github.com/mdevilliers/kubernetes-rabbitmq-cluster/util"
+	"github.com/mdevilliers/kubernetes-rabbitmq-cluster/pkg/etcd"
+	"github.com/mdevilliers/kubernetes-rabbitmq-cluster/pkg/paths"
+	"github.com/mdevilliers/kubernetes-rabbitmq-cluster/pkg/sidekick"
+	"github.com/mdevilliers/kubernetes-rabbitmq-cluster/pkg/util"
 )
 
 func main() {
@@ -20,7 +22,7 @@ func main() {
 	fmt.Println("rabbitmq-cluster-sidekick")
 
 	connection := etcd.NewConnection([]string{"http://127.0.0.1:2379"})
-	pathManager := etcd.NewPathManager("astana")
+	pathManager := paths.NewPathManager("astana")
 
 	ipAddress, err := util.GetIPAddress()
 
@@ -28,12 +30,12 @@ func main() {
 		panic("Error retreiving ipAddress : " + err.Error())
 	}
 
-	kicker := etcd.NewKicker(connection, pathManager, ipAddress)
+	kicker := sidekick.NewKicker(connection, pathManager, ipAddress)
 	kicker.StartKicking()
 
-	registry := etcd.NewRegistry(connection, pathManager)
+	registry := sidekick.NewRegistry(connection, pathManager)
 
-	cb := func(r *etcd.Response) (bool, error) {
+	cb := func(r *sidekick.Response) (bool, error) {
 		fmt.Printf("Recieved in callback - Path : %s, Watching: %s, Old Value : %s, New Value %s \n", r.Path, r.WatchPath, r.OldValue, r.NewValue)
 		return true, nil
 	}

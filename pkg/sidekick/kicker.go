@@ -1,8 +1,10 @@
-package etcd
+package sidekick
 
 import (
 	"fmt"
-	"github.com/mdevilliers/kubernetes-rabbitmq-cluster/util"
+	"github.com/mdevilliers/kubernetes-rabbitmq-cluster/pkg/etcd"
+	"github.com/mdevilliers/kubernetes-rabbitmq-cluster/pkg/paths"
+	"github.com/mdevilliers/kubernetes-rabbitmq-cluster/pkg/util"
 	"time"
 )
 
@@ -12,12 +14,12 @@ var (
 )
 
 type Kicker struct {
-	connection *Connection
-	paths      *Paths
+	connection *etcd.Connection
+	paths      *paths.Paths
 	ipAddress  string
 }
 
-func NewKicker(connection *Connection, paths *Paths, ipAddress string) *Kicker {
+func NewKicker(connection *etcd.Connection, paths *paths.Paths, ipAddress string) *Kicker {
 
 	kicker := &Kicker{
 		connection: connection,
@@ -49,7 +51,7 @@ func (k *Kicker) ensureDirExists(path string) error {
 
 	if err != nil {
 
-		if isKeyNotFoundError(err) {
+		if etcd.IsKeyNotFoundError(err) {
 
 			_, err := k.connection.SetDir(path, 0)
 			if err != nil {

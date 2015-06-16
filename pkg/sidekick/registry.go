@@ -1,9 +1,11 @@
-package etcd
+package sidekick
 
 import (
 	"errors"
 	"fmt"
 	etcdclient "github.com/coreos/go-etcd/etcd"
+	"github.com/mdevilliers/kubernetes-rabbitmq-cluster/pkg/etcd"
+	"github.com/mdevilliers/kubernetes-rabbitmq-cluster/pkg/paths"
 	"sync"
 )
 
@@ -17,8 +19,8 @@ type Registry struct {
 	sync.RWMutex
 	sealed     bool
 	callbacks  map[string]RegistryCallback
-	connection *Connection
-	paths      *Paths
+	connection *etcd.Connection
+	paths      *paths.Paths
 }
 
 type Response struct {
@@ -31,7 +33,7 @@ type Response struct {
 // TODO : return a object with Path, Value, NewValue
 type RegistryCallback func(*Response) (bool, error)
 
-func NewRegistry(connection *Connection, paths *Paths) *Registry {
+func NewRegistry(connection *etcd.Connection, paths *paths.Paths) *Registry {
 	return &Registry{
 		callbacks:  make(map[string]RegistryCallback),
 		connection: connection,
@@ -97,7 +99,7 @@ func (r *Registry) simpleReceiver(cs chan *etcdclient.Response, watchPath string
 
 	for response := range cs {
 
-		fmt.Printf("Received in watch : %s \n", PrettyPrintResponse(response))
+		fmt.Printf("Received in watch : %s \n", etcd.PrettyPrintResponse(response))
 
 		callbackResponse := &Response{
 			Path:      response.Node.Key,

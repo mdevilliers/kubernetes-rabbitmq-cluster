@@ -1,4 +1,4 @@
-package etcd
+package paths
 
 type Paths struct {
 	clusterName string
