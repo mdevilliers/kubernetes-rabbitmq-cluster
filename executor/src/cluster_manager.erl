@@ -1,15 +1,13 @@
 -module (cluster_manager).
 
--export ([status/1, cluster_with_node/2, stop_app/1,start_app/1 ]).
+-export ([status/1, cluster_with_node/3, stop_app/1,start_app/1 ]).
 
 status(Node) ->
 	rpc_call(Node, rabbit_mnesia, status, []).
 
-cluster_with_node(Node, disc) ->
- 	ClusterNode = list_to_atom(Node),
+cluster_with_node(Node, ClusterNode, disc) ->
 	rpc_call(Node, rabbit_mnesia, join_cluster, [ClusterNode, disc]);
-cluster_with_node(Node, ram) ->
- 	ClusterNode = list_to_atom(Node),
+cluster_with_node(Node, ClusterNode, ram) ->
 	rpc_call(Node, rabbit_mnesia, join_cluster, [ClusterNode, ram]).
 
 stop_app(Node) ->
