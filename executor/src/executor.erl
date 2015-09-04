@@ -2,19 +2,19 @@
 
 -export([main/1]).
 
--define ( WAIT_MAX_IN_MS , 300000).
+-define (WAIT_MAX_IN_MS, 300000).
 
 main([]) -> 
 	
 	net_kernel:start([executor, shortnames]),
 	
-	{ok, Cookie} = find_cookie(),
+	{ok, Cookie} = find_in_env("RABBITMQ_ERLANG_COOKIE"),
 	erlang:set_cookie(node(), Cookie),
 
 	BackOff = backoff:init(5000, ?WAIT_MAX_IN_MS),
 
-	{ok, NodeToCommunicateWith} = find_node_to_communicate_with(),
-	{ok, Node} = find_node_to_cluster_with(),
+	{ok, NodeToCommunicateWith} = find_in_env("RABBITMQ_NODE_TO_COMMAND"),
+	{ok, Node} = find_in_env("RABBITMQ_NODE_TO_CLUSTER_WITH"),
 
 	io:format("Node found to communicate with : ~p~n", [NodeToCommunicateWith]),
 	io:format("Node found to cluster with : ~p~n", [Node]),
@@ -25,41 +25,54 @@ main([]) ->
 	{ok} = get_status(NodeToCommunicateWith, BackOff),
 
 	Result = cluster_manager:stop_app(NodeToCommunicateWith),
+
 	io:format("Stop App : ~p~n", [Result]),
-	timer:sleep(5000),
+	
 	Result1 = cluster_manager:cluster_with_node(NodeToCommunicateWith, Node, ram),
+
 	io:format("Cluster : ~p~n", [Result1]),
-	timer:sleep(5000),
+
+	ok = update_cluster_node_needed(Result1, NodeToCommunicateWith, Node), 
+
 	Result2 = cluster_manager:start_app(NodeToCommunicateWith),
+
 	io:format("Start App : ~p~n", [Result2]),
 
 	timer:sleep(infinity).
 
 
-find_cookie() ->
-	case os:getenv("RABBITMQ_ERLANG_COOKIE") of
-		false ->
-			{error, no_cookie_found};
-		V -> {ok, list_to_atom(V)}
-	end.
+% private
+update_cluster_node_needed({error,mnesia_not_running}, NodeToCommunicateWith, Node) -> 
 
-find_node_to_communicate_with() ->
-	case os:getenv("RABBITMQ_NODE_TO_COMMAND") of
-		false ->
-			{error, no_node_configured_to_cluster_with};
-		V -> {ok, list_to_atom(V)}
-	end.
+	io:format("Mnesia not running~n"),
+	% start
+	cluster_manager:start_app(NodeToCommunicateWith),
 
-find_node_to_cluster_with() ->
-	case os:getenv("RABBITMQ_NODE_TO_CLUSTER_WITH") of
-		false ->
-			{error, no_node_configured_to_cluster_with};
+	% wait
+	timer:sleep(5000),
+
+	% stop
+	cluster_manager:stop_app(NodeToCommunicateWith),
+
+	% cluster again
+	Result = cluster_manager:cluster_with_node(NodeToCommunicateWith, Node, ram),
+	update_cluster_node_needed(Result, NodeToCommunicateWith,Node);
+
+update_cluster_node_needed({ok,already_member} ,NodeToCommunicateWith, Node) -> 
+	Result = cluster_manager:update_cluster_node( NodeToCommunicateWith, Node ),
+	io:format("Update Cluster Node : ~p~n", [Result]),
+	ok;
+update_cluster_node_needed(_,_,_) -> ok.
+
+find_in_env(Key) -> 
+	case os:getenv(Key) of
+		false -> {error, not_found};
 		V -> {ok, list_to_atom(V)}
 	end.
 
 get_status(Node, BackOff) ->
-	Result = cluster_manager:status(Node),
 	
+	Result = cluster_manager:status(Node),	
 	io:format("Status : ~p~n", [Result]),
 
 	case Result of
