@@ -1,6 +1,6 @@
 -module (cluster_manager).
 
--export ([status/1, cluster_with_node/3, stop_app/1, start_app/1, update_cluster_node/2 ]).
+-export ([status/1, cluster_with_node/3, stop_app/1, start_app/1, update_cluster_node/2, mnesia_reset/1 ]).
 
 status(Node) ->
 	rpc_call(Node, rabbit_mnesia, status, []).
@@ -17,6 +17,9 @@ start_app(Node) ->
 
 update_cluster_node(Node,ClusterNode) ->
     rpc_call(Node, rabbit_mnesia, update_cluster_nodes, [ClusterNode]).
+
+mnesia_reset(Node) ->
+    rpc_call(Node, rabbit_mnesia, reset, []).
 
 % private
 rpc_call(Node, Mod, Fun, Args) ->

@@ -27,36 +27,39 @@ main([]) ->
 	Result = cluster_manager:stop_app(NodeToCommunicateWith),
 
 	io:format("Stop App : ~p~n", [Result]),
-	
-	Result1 = cluster_manager:cluster_with_node(NodeToCommunicateWith, Node, ram),
 
-	io:format("Cluster : ~p~n", [Result1]),
+
+	Result1 = cluster_manager:mnesia_reset(NodeToCommunicateWith),
+	io:format("Mnesia Reset : ~p~n", [Result1]),
+	
+	Result2 = cluster_manager:cluster_with_node(NodeToCommunicateWith, Node, ram),
+	io:format("Cluster : ~p~n", [Result2]),
 
 	ok = update_cluster_node_needed(Result1, NodeToCommunicateWith, Node), 
 
-	Result2 = cluster_manager:start_app(NodeToCommunicateWith),
+	Result3 = cluster_manager:start_app(NodeToCommunicateWith),
 
-	io:format("Start App : ~p~n", [Result2]),
+	io:format("Start App : ~p~n", [Result3]),
 
 	timer:sleep(infinity).
 
 
 % private
-update_cluster_node_needed({error,mnesia_not_running}, NodeToCommunicateWith, Node) -> 
+% update_cluster_node_needed({error,mnesia_not_running}, NodeToCommunicateWith, Node) -> 
 
-	io:format("Mnesia not running~n"),
+	% io:format("Mnesia not running~n"),
 	% start
-	cluster_manager:start_app(NodeToCommunicateWith),
+	% cluster_manager:start_app(NodeToCommunicateWith),
 
 	% wait
-	timer:sleep(5000),
+	% timer:sleep(5000),
 
 	% stop
-	cluster_manager:stop_app(NodeToCommunicateWith),
+	% cluster_manager:stop_app(NodeToCommunicateWith),
 
 	% cluster again
-	Result = cluster_manager:cluster_with_node(NodeToCommunicateWith, Node, ram),
-	update_cluster_node_needed(Result, NodeToCommunicateWith,Node);
+	% Result = cluster_manager:cluster_with_node(NodeToCommunicateWith, Node, ram),
+	% update_cluster_node_needed(Result, NodeToCommunicateWith,Node);
 
 update_cluster_node_needed({ok,already_member} ,NodeToCommunicateWith, Node) -> 
 	Result = cluster_manager:update_cluster_node( NodeToCommunicateWith, Node ),
