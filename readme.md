@@ -1,10 +1,12 @@
 kubernetes-rabbitmq-cluster
 ---------------------------
 
-PLEASE NOTE THIS PROJECT IS NO LONGER MAINTIANED 
+PLEASE NOTE THIS PROJECT IS NO LONGER MAINTAINED 
 ------------------------------------------------
 
-[![Build Status](https://travis-ci.org/mdevilliers/kubernetes-rabbitmq-cluster.svg)](https://travis-ci.org/mdevilliers/kubernetes-rabbitmq-cluster)
+Other options - 
+
+https://github.com/nanit/kubernetes-rabbitmq-cluster 
 
 Experiment to produce a "kubernentes first" rabbitmq cluster manager.
 
